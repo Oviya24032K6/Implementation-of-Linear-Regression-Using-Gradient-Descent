@@ -15,52 +15,64 @@ To write a program to predict the profit of a city using the linear regression m
 
 ## Program:
 ```
-/*
-Program to implement the linear regression using gradient descent.
-Developed by: OVIYA P
-RegisterNumber:  212223110033
-*/
-
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-def linear_regression(X1,y,learning_rate=0.01,num_iter=1000):
-  X=np.c_[np.ones(len(X1)),X1]
 
-  theta = np.zeros(X.shape[1]).reshape(-1,1)
+def linear_regression(X, y, learning_rate=0.1, num_iters=1000):
+    # Add a column of ones to X for the intercept term (bias)
+    X = np.c_[np.ones(len(X)), X]
+    # Initialize theta (model parameters) with zeros
+    theta = np.zeros((X.shape[1], 1))
+    
+    # Perform gradient descent
+    for _ in range(num_iters):
+        # Calculate predictions
+        predictions = X.dot(theta)
+        # Calculate errors
+        errors = predictions - y
+        # Update theta using gradient descent
+        theta -= learning_rate * (1/len(X)) * X.T.dot(errors)
+    
+    return theta
 
-  for i in range (num_iter):
-    predic=(X).dot(theta).reshape(-1,1)
+# Load the dataset
+data = pd.read_csv('50_Startups.csv')
 
-    errors = (predic - y).reshape (-1,1)
+# Display the first five rows of the dataset
+print("First five rows of the dataset:")
+print(data.head())
 
-    theta-= learning_rate * (1/len(X1)) * X.T.dot(errors)
+# Extract features (excluding the 'State' column) and target variable 'Profit'
+X = data.iloc[:, :-1].select_dtypes(include=[np.number]).values
+y = data.iloc[:, -1].values.reshape(-1, 1)
 
-  return theta
+# Scaling the features and the target variable
+scaler_X = StandardScaler()
+scaler_y = StandardScaler()
 
+X_scaled = scaler_X.fit_transform(X)
+y_scaled = scaler_y.fit_transform(y)
 
-data = pd.read_csv("/content/50_Startups.csv",header=None)
+# Train the linear regression model using gradient descent
+theta = linear_regression(X_scaled, y_scaled)
 
-X=(data.iloc[1:, :-2].values)
-X1=X.astype(float)
-scaler = StandardScaler()
-y=(data.iloc[1:,-1].values).reshape(-1,1)
-X1_Scaled= scaler.fit_transform(X1)
-Y1_Scaled =scaler.fit_transform(y)
+# Predict profit for a new city (example data point)
+new_data = np.array([165349.2, 136897.8, 471784.1]).reshape(1, -1)
+new_data_scaled = scaler_X.transform(new_data)
+prediction_scaled = np.dot(np.append(1, new_data_scaled), theta).reshape(-1, 1)
 
-theta=linear_regression(X1_Scaled,Y1_Scaled)
+# Inverse transform the prediction to get the original scale
+predicted_profit = scaler_y.inverse_transform(prediction_scaled)
 
-new_data=np.array([165349.2,136897.8,471794.1]).reshape(-1,1)
-new_Scaled= scaler.fit_transform(new_data)
-prediction= np.dot(np.append(1,new_Scaled),theta)
-prediction=prediction.reshape(-1,1)
-pre=scaler.inverse_transform(prediction)
-print(f"Predicted value : {pre}")
+# Output the prediction
+print(f"\nPredicted Profit for the city: {predicted_profit[0][0]:.2f}")
 
 ```
 
 ## Output:
-![image](https://github.com/user-attachments/assets/d8f0ee69-421f-4900-9716-04a935fa9d21)
+![image](https://github.com/user-attachments/assets/588fbcc9-af1c-43c6-ac5f-4da28ccf1aba)
+
 
 
 
